@@ -2,7 +2,9 @@
 
 #### 1. Tener instalado el composer
 
-#### 2. Ejecutar los siguientes comandos
+#### 2. Crear la carpeta a2sync con algun archivo .csv
+
+#### 3. Ejecutar los siguientes comandos
 
 `composer install`
 
