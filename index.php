@@ -4,11 +4,17 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Automattic\WooCommerce\Client;
 
+// header('Content-type: text/plain; charset=utf-8');
+
 // Directorio del archivo .csv
 $dir = "a2sync/";
 
+// Directorios de los logs
+$log_dir = "logs/";
+
 // archivo origen
 $origen = scandir($dir, 1);
+
 
 // Conexión WooCommerce API destino
 // ================================
@@ -24,8 +30,15 @@ $woocommerce = new Client(
 );
 // ================================
 
-echo "SINCRONIZACIÓN ENTRE A2 y WOOCOMMERCE \n<br>";
-echo "[ " . date('Y/m/d') . " " . date('h:i:sa') . " ] Iniciando Sincronización (timestamp de la hora actual de Venezuela) \n<br> \n<br>";
+// Creación del archivo de los logs
+$log_file = fopen($log_dir . date('Y-m-d') . ' ' . date('h.i.sa') . '.txt', "a");
+
+
+
+fwrite($log_file, "SINCRONIZACIÓN ENTRE A2 y WOOCOMMERCE \n");
+fwrite($log_file, "[ " . date('Y/m/d') . " " . date('h:i:sa') . " ] Iniciando Sincronización (timestamp de la hora actual de Venezuela) \n \n");
+echo "SINCRONIZACIÓN ENTRE A2 y WOOCOMMERCE \n";
+echo "[ " . date('Y/m/d') . " " . date('h:i:sa') . " ] Iniciando Sincronización (timestamp de la hora actual de Venezuela) \n \n";
 
 
 // Obtenemos los datos del origen
@@ -36,11 +49,12 @@ $items_origin = '';
  
 // abrimos csv
 if (!($fp = fopen('a2sync/' . $origen[0], 'r'))) {
+    fwrite($log_file,"No se pudo abrir el archivo...");
     die("No se pudo abrir el archivo...");
 }
 
-
-echo "Leyendo el archivo " . $origen[0] . "\n<br> \n<br>";
+fwrite($log_file, "Leyendo el archivo " . $origen[0] . "\n \n");
+echo "Leyendo el archivo " . $origen[0] . "\n \n";
 
 
 //asignamos cabeceras csv
@@ -50,13 +64,13 @@ $key = fgetcsv($fp,"0",";");
 $json = array();
 
 while ($row = fgetcsv($fp,"0",";")) {
-    $json[] = array_combine($key, $row);
+    $exp = '/[\W]*/';
+    $new_row = preg_replace($exp, '', $row);
+    $json[] = array_combine($key, $new_row);
 }
      
 // cerramos flujo abierto
 fclose($fp);
-
-print_r($json);
      
 // codificamos array en formato json
 $items_origin = json_encode($json);
@@ -65,6 +79,7 @@ $items_origin = json_encode($json);
 
 
 if ( ! $items_origin ) {
+    fwrite($log_file, "Error en el archivo origen");
     exit('❗Error en el archivo origen');
 }
 
@@ -114,7 +129,8 @@ foreach($products as $product){
         'name' => $search_item['nombre']
     ];
 
-    echo "SKU " . $sku . " actualizando en Woocommerce... \n<br>";
+    fwrite($log_file, "SKU " . $sku . " actualizando en Woocommerce... \n");
+    echo "SKU " . $sku . " actualizando en Woocommerce... \n";
 
 }
 
@@ -128,10 +144,15 @@ $data = [
 $result = $woocommerce->post('products/batch', $data);
 
 if (! $result) {
+    fwrite($log_file, "Error al actualizar productos \n");
     echo("❗Error al actualizar productos \n");
 } else {
+    fwrite($log_file, "\n✔ TOTAL: " . count($products) . " registros hallados y actualizados. \n");
+    fwrite($log_file, date('Y/m/d') . " " .date('h:i:sa') . " Terminado el proceso.");
     echo "\n✔ TOTAL: " . count($products) . " registros hallados y actualizados. \n";
     echo date('Y/m/d') . " " .date('h:i:sa') . " Terminado el proceso.";
 }
 
-echo "<br><br>\n\n----------------------------------\n\n<br><br>";
+fwrite($log_file, "\n\n----------------------------------\n\n");
+echo "<br><br>\n\n----------------------------------\n\n";
+fclose($log_file);
