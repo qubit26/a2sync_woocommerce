@@ -26,7 +26,10 @@ $woocommerce = new Client(
     $url_API_woo,
     $ck_API_woo,
     $cs_API_woo,
-    ['version' => 'wc/v3']
+    [
+        'version' => 'wc/v3',
+        'timeout' => 400
+    ]
 );
 // ================================
 
