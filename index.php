@@ -4,7 +4,7 @@ require __DIR__ . '/vendor/autoload.php';
 
 use Automattic\WooCommerce\Client;
 
-// header('Content-type: text/plain; charset=utf-8');
+header('Content-type: text/plain; charset=utf-8');
 
 // Directorio del archivo .csv
 $dir = "a2sync/";
