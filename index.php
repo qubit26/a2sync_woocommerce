@@ -68,8 +68,10 @@ while ($row = fgetcsv($fp,"0",";")) {
         $exp = '/[\W]*/';
         $new_row = preg_replace($exp, '', $row);
         $json[] = array_combine($key, $new_row);
+    } else {
+
+        $json[] = array_combine($key, $row);
     }
-    $json[] = array_combine($key, $row);
 }
      
 // cerramos flujo abierto
