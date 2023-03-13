@@ -64,9 +64,12 @@ $key = fgetcsv($fp,"0",";");
 $json = array();
 
 while ($row = fgetcsv($fp,"0",";")) {
-    $exp = '/[\W]*/';
-    $new_row = preg_replace($exp, '', $row);
-    $json[] = array_combine($key, $new_row);
+    if ($key == 'SKU') {
+        $exp = '/[\W]*/';
+        $new_row = preg_replace($exp, '', $row);
+        $json[] = array_combine($key, $new_row);
+    }
+    $json[] = array_combine($key, $row);
 }
      
 // cerramos flujo abierto
@@ -108,7 +111,7 @@ foreach ($items_origin as $item){
 
 
 // Obtenemos todos los productos
-$products = $woocommerce->get('products/?sku='. $param_sku);
+$products = $woocommerce->get('products?sku='. $param_sku);
 
 // Construimos la data en base a los productos recuperados
 $item_data = [];
